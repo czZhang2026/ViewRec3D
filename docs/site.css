@@ -43,3 +43,13 @@
 .paper-notes h3{font-size:1.18rem;margin:0 0 .65rem}
 .paper-notes section+section{margin-top:1.5rem}
 .citation-placeholder{margin:0;min-height:3.5rem;border:1px solid var(--line);border-radius:6px;padding:1rem;background:#f6f8fa}
+
+/* Align the three research sections on the same reading column. */
+main > .section {
+  margin-inline: auto;
+}
+main > .section > p {
+  max-width: 800px;
+  margin-inline: auto;
+  text-align: center;
+}
