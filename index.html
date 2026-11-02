@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ViewRec3D: Learning to Recommend 3D Viewpoints for AI Photography. Explore our dataset, method, results, and interactive sample gallery.">
+  <title>ViewRec3D | 3D Viewpoints for AI Photography</title>
+  <link rel="stylesheet" href="docs/site.css">
+</head>
+<body>
+<main>
+  <section class="hero" id="overview">
+    <h1><strong>ViewRec3D</strong><br>Learning to Recommend 3D Viewpoints<br class="desktop-break"> for AI Photography</h1>
+    <p class="authors">
+      Chengzhi Zhang<sup>1,*</sup>,
+      Yunzhong Hou<sup>1,*,†</sup>,
+      Zizheng Sun<sup>1</sup>,
+      Ming-Hsuan Yang<sup>2</sup>,
+      Chi Harold Liu<sup>1</sup>
+    </p>
+    <p class="affiliations"><sup>1</sup>Beijing Institute of Technology &nbsp;&nbsp; <sup>2</sup>University of California, Merced</p>
+    <p class="fine-print"><sup>*</sup>Equal contribution. &nbsp;&nbsp; <sup>†</sup>Corresponding author.</p>
+    <nav class="actions" aria-label="Project resources">
+      <a class="button" href="ViewRec3D.pdf"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z M14 3v5h4 M9 12h6 M9 16h6"/></svg>Paper</a>
+      <a class="button" href="https://github.com/anonymous1-submission/ViewRec3D"><img src="https://github.githubassets.com/favicons/favicon-dark.svg" width="20" height="20" alt="">Code</a>
+      <a class="button" href="https://huggingface.co/datasets/czZhang2026/ViewRecDB-100K"><img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" width="20" height="20" alt="">Dataset</a>
+      <a class="button" href="https://huggingface.co/czZhang2026/ViewRecNet"><img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" width="20" height="20" alt="">Model</a>
+    </nav>
+    <figure class="hero-figure">
+      <img class="asset-image" src="docs/fig/fig1.png" alt="ViewRec3D overview: expert photographs, 3D scene reconstruction, dataset generation, and viewpoint recommendation">
+      <figcaption>Overview of ViewRec3D: generating viewpoint recommendation data from expert photographs and learning to predict expert viewpoints with ViewRecNet.</figcaption>
+    </figure>
+  </section>
+  <section class="section abstract">
+    <h2>Abstract</h2>
+    <p>Viewpoint dictates the photo composition and plays a vital role in AI photography. Existing 3D viewpoint recommendation methods are often <em>limited</em> in viewpoint adjustments, which is mainly due to their lack of high-quality training data with <em>accurate and large</em> 3D view changes. Ideally, the training data should contain suboptimal images and expert-selected optimal viewpoints, but this can be very expensive to curate. To solve this, we build an automatically-generated 3D viewpoint recommendation dataset from expert photos. Specifically, we first consider these expert photos as optimal and outpaint them to provide more information on scene layouts. Next, we explicitly reconstruct the 3D scene. We then render suboptimal images from random viewpoints. Lastly, we introduce a hierarchical data filtering scheme and acquire high-quality data pairs for our ViewRecDB-100K dataset. On top of this, we further introduce a view recommendation model, ViewRecNet, that can predict expert viewpoints from any suboptimal image inputs using a ray-based dense supervision. The proposed method achieves strong results both  quantitatively and qualitatively, supported by LLM-based viewpoint preference and human studies.</p>
+  </section>
+  <section class="section" id="method">
+    <h2>Data Generation</h2>
+    <p><strong>Data generation pipeline.</strong> Starting from expert photographs, we generate suboptimal-to-optimal viewpoint pairs through image outpainting, 3D Gaussian reconstruction, random-view rendering, and image restoration.</p>
+    <figure>
+      <img class="asset-image" src="docs/fig/fig2.png" alt="Data generation pipeline" loading="lazy">
+      <figcaption>Figure 2: <strong>Data generation method.</strong> Given an optimal image (a), we first determine whether orientation adjustment is required and outpaint the image (b). We then reconstruct the complete 3D scene (c) and render multiple Gaussian splatting (GS) images (d) from random viewpoints. Finally, we restore holes or other artifacts in GS images to get corresponding suboptimal images.</figcaption>
+    </figure>
+    <p><strong>Hierarchical filtering.</strong> We apply hierarchical filtering to outpainted images, rendered views, and restored images, using image similarity, LLM-based visual checks, and VGGT-based pose verification to retain high-quality pairs.</p>
+    <figure>
+      <img class="asset-image" src="docs/fig/fig3.png" alt="Hierarchical filtering for outpainting, novel views, and image restoration" loading="lazy">
+      <figcaption>Figure 3: <strong>Hierarchical filtering</strong> for outpainting, novel views, and image restoration (left to right).</figcaption>
+    </figure>
+    <p id="visualize"><strong>visualize</strong></p>
+    <p class="sample-description">Select an original image below to explore its visualization. Translation: (x, y, z). Rotation: (pitch, yaw, roll), in degrees. Angular errors compare estimated and target poses. Move the pointer over the images, or swipe on touchscreens, to compare views. Use the arrow keys when a comparison is focused.</p>
+    <div class="sample-gallery"><article class="sample-group" id="sample-panel-0" aria-label="Selected sample visualization"><div class="sample-top"><figure class="sample-image"><img src="docs/fig/samples/-0Kj1ytHE2g/generated_1.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-0Kj1ytHE2g/original.jpeg" alt="Original" loading="lazy"><figcaption>Original</figcaption></figure><div class="sample-pose"><p><strong>VGGT pose (estimated pose)</strong><br>trans: -0.073, 0.180, -0.003<br>rot: -0.056, 7.873, 1.205</p><p><strong>GT pose (target pose)</strong><br>trans: -0.140, 0.402, 0.117<br>rot: -4.220, 11.781, 0.000</p><p>∠(rot) = 5.687°<br>∠(trans) = 16.619°</p></div></div><div class="sample-bottom"><figure class="sample-image"><img src="docs/fig/samples/-0Kj1ytHE2g/outpaint.jpeg" alt="Outpaint" loading="lazy"><figcaption>Outpaint</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-0Kj1ytHE2g/gaussians_1.jpeg" alt="Gaussians" loading="lazy"><figcaption>Gaussians</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-0Kj1ytHE2g/generated_1.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:6000/4000;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 1: compare Original and Restored"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/-0Kj1ytHE2g/original.jpeg" alt="Original" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/-0Kj1ytHE2g/restored.jpeg" alt="Restored" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Original / Restored</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:832/1248;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 1: compare Generated and Gaussians"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/-0Kj1ytHE2g/gaussians_1.jpeg" alt="Gaussians" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/-0Kj1ytHE2g/generated_1.jpeg" alt="Generated" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Generated / Gaussians</figcaption></figure></div></article>
+<article class="sample-group" id="sample-panel-1" aria-label="Selected sample visualization" hidden><div class="sample-top"><figure class="sample-image"><img src="docs/fig/samples/-0QZEy3nCTA/generated_3.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-0QZEy3nCTA/original.jpeg" alt="Original" loading="lazy"><figcaption>Original</figcaption></figure><div class="sample-pose"><p><strong>VGGT pose (estimated pose)</strong><br>trans: -0.295, -0.017, 0.022<br>rot: 16.135, 33.753, -0.430</p><p><strong>GT pose (target pose)</strong><br>trans: -4.272, 0.195, 0.417<br>rot: 10.755, 24.168, 0.000</p><p>∠(rot) = 11.098°<br>∠(trans) = 6.035°</p></div></div><div class="sample-bottom"><figure class="sample-image"><img src="docs/fig/samples/-0QZEy3nCTA/outpaint.jpeg" alt="Outpaint" loading="lazy"><figcaption>Outpaint</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-0QZEy3nCTA/gaussians_3.jpeg" alt="Gaussians" loading="lazy"><figcaption>Gaussians</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-0QZEy3nCTA/generated_3.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:5338/3003;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 2: compare Original and Restored"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/-0QZEy3nCTA/original.jpeg" alt="Original" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/-0QZEy3nCTA/restored.jpeg" alt="Restored" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Original / Restored</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:1360/768;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 2: compare Generated and Gaussians"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/-0QZEy3nCTA/gaussians_3.jpeg" alt="Gaussians" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/-0QZEy3nCTA/generated_3.jpeg" alt="Generated" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Generated / Gaussians</figcaption></figure></div></article>
+<article class="sample-group" id="sample-panel-2" aria-label="Selected sample visualization" hidden><div class="sample-top"><figure class="sample-image"><img src="docs/fig/samples/-35QfWR7Byo/generated_1.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-35QfWR7Byo/original.jpeg" alt="Original" loading="lazy"><figcaption>Original</figcaption></figure><div class="sample-pose"><p><strong>VGGT pose (estimated pose)</strong><br>trans: -0.070, 0.021, 0.159<br>rot: -15.385, 6.716, -0.243</p><p><strong>GT pose (target pose)</strong><br>trans: -0.925, 0.223, 0.211<br>rot: -13.847, 5.891, 0.000</p><p>∠(rot) = 1.738°<br>∠(trans) = 52.889°</p></div></div><div class="sample-bottom"><figure class="sample-image"><img src="docs/fig/samples/-35QfWR7Byo/outpaint.jpeg" alt="Outpaint" loading="lazy"><figcaption>Outpaint</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-35QfWR7Byo/gaussians_1.jpeg" alt="Gaussians" loading="lazy"><figcaption>Gaussians</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-35QfWR7Byo/generated_1.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:2010/2601;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 3: compare Original and Restored"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/-35QfWR7Byo/original.jpeg" alt="Original" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/-35QfWR7Byo/restored.jpeg" alt="Restored" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Original / Restored</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:896/1160;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 3: compare Generated and Gaussians"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/-35QfWR7Byo/gaussians_1.jpeg" alt="Gaussians" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/-35QfWR7Byo/generated_1.jpeg" alt="Generated" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Generated / Gaussians</figcaption></figure></div></article>
+<article class="sample-group" id="sample-panel-3" aria-label="Selected sample visualization" hidden><div class="sample-top"><figure class="sample-image"><img src="docs/fig/samples/-TWBB-7dUMM/generated_1.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-TWBB-7dUMM/original.jpeg" alt="Original" loading="lazy"><figcaption>Original</figcaption></figure><div class="sample-pose"><p><strong>VGGT pose (estimated pose)</strong><br>trans: -0.100, 0.120, 0.121<br>rot: 34.165, 2.855, 4.042</p><p><strong>GT pose (target pose)</strong><br>trans: -0.223, 0.273, 0.136<br>rot: 33.653, 7.694, 0.000</p><p>∠(rot) = 6.295°<br>∠(trans) = 16.729°</p></div></div><div class="sample-bottom"><figure class="sample-image"><img src="docs/fig/samples/-TWBB-7dUMM/outpaint.jpeg" alt="Outpaint" loading="lazy"><figcaption>Outpaint</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-TWBB-7dUMM/gaussians_1.jpeg" alt="Gaussians" loading="lazy"><figcaption>Gaussians</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/-TWBB-7dUMM/generated_1.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:4911/7366;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 4: compare Original and Restored"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/-TWBB-7dUMM/original.jpeg" alt="Original" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/-TWBB-7dUMM/restored.jpeg" alt="Restored" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Original / Restored</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:832/1256;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 4: compare Generated and Gaussians"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/-TWBB-7dUMM/gaussians_1.jpeg" alt="Gaussians" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/-TWBB-7dUMM/generated_1.jpeg" alt="Generated" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Generated / Gaussians</figcaption></figure></div></article>
+<article class="sample-group" id="sample-panel-4" aria-label="Selected sample visualization" hidden><div class="sample-top"><figure class="sample-image"><img src="docs/fig/samples/1L2J8TnVod8/generated_1.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/1L2J8TnVod8/original.jpeg" alt="Original" loading="lazy"><figcaption>Original</figcaption></figure><div class="sample-pose"><p><strong>VGGT pose (estimated pose)</strong><br>trans: -0.552, 0.007, 0.327<br>rot: 5.003, 45.310, -1.127</p><p><strong>GT pose (target pose)</strong><br>trans: -2.515, -0.162, 0.978<br>rot: 0.963, 36.956, 0.000</p><p>∠(rot) = 9.662°<br>∠(trans) = 10.184°</p></div></div><div class="sample-bottom"><figure class="sample-image"><img src="docs/fig/samples/1L2J8TnVod8/outpaint.jpeg" alt="Outpaint" loading="lazy"><figcaption>Outpaint</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/1L2J8TnVod8/gaussians_1.jpeg" alt="Gaussians" loading="lazy"><figcaption>Gaussians</figcaption></figure><figure class="sample-image"><img src="docs/fig/samples/1L2J8TnVod8/generated_1.jpeg" alt="Generated" loading="lazy"><figcaption>Generated</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:6000/4000;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 5: compare Original and Restored"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/1L2J8TnVod8/original.jpeg" alt="Original" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/1L2J8TnVod8/restored.jpeg" alt="Restored" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Original / Restored</figcaption></figure><figure class="sample-compare"><div class="compare-slider" data-slider><div class="compare-inner" style="aspect-ratio:1248/832;--pos:50%" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal" aria-label="Sample 5: compare Generated and Gaussians"><div class="compare-image compare-image--bottom"><img src="docs/fig/samples/1L2J8TnVod8/gaussians_1.jpeg" alt="Gaussians" loading="lazy" draggable="false"></div><div class="compare-image compare-image--top"><img src="docs/fig/samples/1L2J8TnVod8/generated_1.jpeg" alt="Generated" loading="lazy" draggable="false"></div><div class="compare-handle" aria-hidden="true"></div></div></div><figcaption>Generated / Gaussians</figcaption></figure></div></article></div>
+    <div class="sample-selector" role="group" aria-label="Choose an original image"><button class="sample-thumbnail" type="button" data-sample="0" aria-controls="sample-panel-0" aria-pressed="true" aria-label="Show example 1"><img src="docs/fig/samples/-0Kj1ytHE2g/original.jpeg" alt="Original photo for example 1" loading="lazy"></button><button class="sample-thumbnail" type="button" data-sample="1" aria-controls="sample-panel-1" aria-pressed="false" aria-label="Show example 2"><img src="docs/fig/samples/-0QZEy3nCTA/original.jpeg" alt="Original photo for example 2" loading="lazy"></button><button class="sample-thumbnail" type="button" data-sample="2" aria-controls="sample-panel-2" aria-pressed="false" aria-label="Show example 3"><img src="docs/fig/samples/-35QfWR7Byo/original.jpeg" alt="Original photo for example 3" loading="lazy"></button><button class="sample-thumbnail" type="button" data-sample="3" aria-controls="sample-panel-3" aria-pressed="false" aria-label="Show example 4"><img src="docs/fig/samples/-TWBB-7dUMM/original.jpeg" alt="Original photo for example 4" loading="lazy"></button><button class="sample-thumbnail" type="button" data-sample="4" aria-controls="sample-panel-4" aria-pressed="false" aria-label="Show example 5"><img src="docs/fig/samples/1L2J8TnVod8/original.jpeg" alt="Original photo for example 5" loading="lazy"></button></div>
+  </section>
+  <section class="section" id="model">
+    <h2>View Recommendation Model</h2>
+    <p><strong>Model Architecture.</strong> Given a single photograph, ViewRecNet recommends a camera rotation, translation, field of view, and image orientation (portrait or landscape). It predicts these adjustments from the camera token of a pretrained VGGT backbone. During training, an auxiliary head predicts camera rays from patch tokens, providing dense geometric supervision.</p>
+    <figure><img class="asset-image" src="docs/fig/fig4.png" alt="ViewRecNet architecture showing the camera prediction and ray supervision branches" loading="lazy"></figure>
+    <p><strong>Quantitative analysis.</strong> On ViewRecEval, ViewRecNet achieves the highest AUC@30 (0.5271). Human raters select its recommendation as the best in 44.48% of comparisons, the highest share among the five methods.</p>
+    <div class="table-scroll"><table>
+      <caption>Table 2: Quantitative comparison on ViewRecEval.</caption>
+      <thead>
+        <tr><th rowspan="2" scope="col">Method</th><th colspan="4">Image-level Consistency</th><th colspan="2">Pose-level Consistency</th><th colspan="3">Preference</th></tr>
+        <tr><th>SSIM ↑</th><th>LPIPS ↓</th><th>PSNR ↑</th><th>CLIP-I ↑</th><th>AUC@30 ↑</th><th>Dist. ↓</th><th>LLM-Better ↑</th><th>LLM-Imp. ↑</th><th>Human-Best ↑</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">CACNet</th><td>0.3616</td><td>0.7178</td><td>14.89</td><td>0.8608</td><td>0.3157</td><td>0.4843</td><td>34.40%</td><td>–</td><td>20.50%</td></tr>
+        <tr><th scope="row">Venus-Q</th><td>0.3584</td><td>0.7330</td><td>14.73</td><td>0.8623</td><td>0.2990</td><td>0.4475</td><td>25.60%</td><td>–</td><td>20.20%</td></tr>
+        <tr><th scope="row">PPC</th><td>0.3915</td><td>0.7167</td><td>15.10</td><td>0.6977</td><td>0.3060</td><td>0.5961</td><td>32.10%</td><td>53.10%</td><td>4.22%</td></tr>
+        <tr><th scope="row">SPAS</th><td>0.3751</td><td>0.7120</td><td>15.05</td><td>0.8421</td><td>0.4686</td><td>0.4587</td><td>35.70%</td><td>52.00%</td><td>10.60%</td></tr>
+        <tr class="ours"><th scope="row">ViewRecNet</th><td>0.3929</td><td>0.6919</td><td>15.31</td><td>0.8812</td><td>0.5271</td><td>0.3080</td><td>Ref.</td><td>67.80%</td><td>44.48%</td></tr>
+      </tbody>
+    </table></div>
+    <p class="fine-print">Arrows indicate whether higher or lower values are better. “Ref.” marks the reference method in pairwise LLM comparisons; “–” indicates that the metric does not apply.</p>
+    <p><strong>Qualitative analysis.</strong> Figure 5 compares the recommended views with the expert photographs. Compare the subject’s position and the amount of surrounding context to see how each method changes the framing.</p>
+    <figure><img class="asset-image" src="docs/fig/fig5-web.jpg" alt="Visual comparison of viewpoint recommendations and expert compositions" loading="lazy"></figure>
+  </section>
+  <footer class="paper-notes">
+  <section id="bibtex">
+    <h3>BibTeX</h3>
+    <pre class="citation-placeholder" aria-label="BibTeX citation placeholder"><code></code></pre>
+  </section>
+  <section id="acknowledgements">
+    <h3>Acknowledgements</h3>
+    <p>This work was supported by the National Natural Science Foundation of China (No. U25A20434).</p>
+  </section>
+</footer>
+</main>
+<script>
+
+// Local-file-safe sample selector; all assets remain available without a server.
+(function () {
+  const buttons = Array.from(document.querySelectorAll('.sample-thumbnail'));
+  const panels = Array.from(document.querySelectorAll('.sample-group'));
+  buttons.forEach((button, index) => {
+    button.addEventListener('click', () => {
+      panels.forEach((panel, i) => { panel.hidden = i !== index; });
+      buttons.forEach((item, i) => item.setAttribute('aria-pressed', String(i === index)));
+    });
+    button.addEventListener('keydown', (event) => {
+      let next;
+      if (event.key === 'ArrowRight') next = (index + 1) % buttons.length;
+      else if (event.key === 'ArrowLeft') next = (index + buttons.length - 1) % buttons.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = buttons.length - 1;
+      else return;
+      event.preventDefault();
+      buttons[next].focus({ preventScroll: true });
+      buttons[next].click();
+    });
+  });
+})();
+// Plain inline script supports opening this HTML directly from disk.
+(function () {
+// Match the supplied presentation: follow mouse movement, with touch swiping.
+for (const slider of document.querySelectorAll('[data-slider]')) {
+  const inner = slider.querySelector('.compare-inner');
+  if (!inner) continue;
+  const setPercent = (value) => {
+    const percent = Math.min(Math.max(value, 0), 100);
+    inner.style.setProperty('--pos', `${percent}%`);
+    inner.setAttribute('aria-valuenow', String(Math.round(percent)));
+  };
+  const setPos = (clientX) => {
+    const rect = inner.getBoundingClientRect();
+    if (rect.width > 0) setPercent((clientX - rect.left) / rect.width * 100);
+  };
+  const onMove = (event) => {
+    if (event.touches && event.touches.length) setPos(event.touches[0].clientX);
+    else if (event.clientX != null) setPos(event.clientX);
+  };
+  inner.addEventListener('mousemove', onMove);
+  inner.addEventListener('touchstart', onMove, { passive: true });
+  inner.addEventListener('touchmove', onMove, { passive: true });
+  inner.addEventListener('keydown', (event) => {
+    const current = Number(inner.getAttribute('aria-valuenow'));
+    const step = event.shiftKey ? 10 : 1;
+    const values = { ArrowLeft: current - step, ArrowDown: current - step,
+      ArrowRight: current + step, ArrowUp: current + step, Home: 0, End: 100 };
+    if (Object.hasOwn(values, event.key)) {
+      event.preventDefault();
+      setPercent(values[event.key]);
+    }
+  });
+}
+
+})();
+</script>
+
+</body>
+</html>

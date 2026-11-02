@@ -1,0 +1,8 @@
+transformers
+accelerate>=1.1.0
+tensorboard
+numpy
+Pillow
+huggingface_hub
+einops
+safetensors
